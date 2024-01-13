@@ -9,7 +9,7 @@ namespace MagicVillaAPI.Data
             return new List<VillaDTO>()
             {
                 new VillaDTO() {Name="Villa One", Id =1},
-                new VillaDTO() {Name="Villa Two", Id =1},
+                new VillaDTO() {Name="Villa Two", Id =2},
             };
         }
     }

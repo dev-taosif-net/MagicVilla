@@ -11,17 +11,55 @@ namespace MagicVillaAPI.Controllers
     public class VillaAPIController : ControllerBase
     {
         [HttpGet]
-        public IEnumerable<VillaDTO> GetVillas()
+        public IActionResult GetVillas()
         {
-           return VillaStore.VillaDTO();
+           return Ok(VillaStore.VillaDTO()) ;
         }
 
-        [HttpGet("id")]
-        public VillaDTO? GetVilla(int id)
+        [HttpGet("id",Name = "GetVilla")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public IActionResult GetVilla(int id)
         {
-            var v = VillaStore.VillaDTO().FirstOrDefault(x => x.Id == id);
+            if (id == 0)
+            {
+                return BadRequest();
+            }
+            var result = VillaStore.VillaDTO().FirstOrDefault(x => x.Id == id);
+            if (result == null)
+            {
+                return NoContent();
+            }
+            return Ok(result);
+        }
 
-            return v;
+        [HttpPost]
+        [Route("Create")]
+        public IActionResult CreateVilla( [FromBody]VillaDTO villaDTO)
+        {
+            if (VillaStore.VillaDTO().FirstOrDefault (x=>x.Name == villaDTO.Name) != null)
+            {
+                ModelState.AddModelError("NameValidation", "Name Already Exists") ;
+
+                return BadRequest(ModelState);
+
+            }
+
+            if (villaDTO == null)
+            {
+                return BadRequest();
+            }
+            if (villaDTO.Id > 0)
+            {
+                return BadRequest(villaDTO.Id);
+            }
+
+            villaDTO.Id = VillaStore.VillaDTO().OrderByDescending(x=>x.Id).Select(x=>x.Id).FirstOrDefault() + 1 ;        
+            VillaStore.VillaDTO().Add(villaDTO);
+
+            return CreatedAtRoute("GetVilla",new {id = villaDTO.Id} ,villaDTO )  ;
+
         }
     }
 }
