@@ -4,11 +4,13 @@ namespace MagicVillaAPI.Models.DTOs
 {
     public class VillaDTO
     {
-        public int Id { get; set; }
+        public required string Name { get; set; }
+        public required string Details { get; set; }
+        public required double Rate { get; set; }
+        public int Sqft { get; set; }
+        public int Occupancy { get; set; }
+        public string? ImageUrl { get; set; }
+        public string? Amenity { get; set; }
 
-        [Required]
-        [MaxLength(60)]
-        public string? Name { get; set; }
-        public DateTime CreatedDate { get; set; } = DateTime.Now;
     }
 }

@@ -1,5 +1,5 @@
 ﻿using MagicVillaAPI.Data;
-using MagicVillaAPI.Models;
+using MagicVillaAPI.Entity;
 using MagicVillaAPI.Models.DTOs;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -11,19 +11,22 @@ namespace MagicVillaAPI.Controllers
     public class VillaAPIController : ControllerBase
     {
         public readonly ILogger<VillaAPIController> logger;
-        public VillaAPIController(ILogger<VillaAPIController> logger)
+        public readonly ApplicationDbContext _db;
+        public VillaAPIController(ILogger<VillaAPIController> logger, ApplicationDbContext _db)
         {
             this.logger = logger;
+            this._db = _db;
         }
 
         [HttpGet]
+        [Route("GetAllVilla")]
         public IActionResult GetVillas()
         {
-            logger.LogInformation("Get All Data");
-           return Ok(VillaStore.VillaDTO()) ;
+            return Ok(_db.Villas.ToList());
         }
 
-        [HttpGet("id",Name = "GetVilla")]
+        [HttpGet]
+        [Route("GetVilla")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -34,7 +37,7 @@ namespace MagicVillaAPI.Controllers
                 logger.LogError("Invalid Data");
                 return BadRequest();
             }
-            var result = VillaStore.VillaDTO().FirstOrDefault(x => x.Id == id);
+            var result = _db.Villas.FirstOrDefault(x => x.Id == id);
             if (result == null)
             {
                 return NoContent();
@@ -43,30 +46,32 @@ namespace MagicVillaAPI.Controllers
         }
 
         [HttpPost]
-        [Route("Create")]
+        [Route("CreateVilla")]
         public IActionResult CreateVilla( [FromBody]VillaDTO villaDTO)
         {
-            if (VillaStore.VillaDTO().FirstOrDefault (x=>x.Name == villaDTO.Name) != null)
-            {
-                ModelState.AddModelError("NameValidation", "Name Already Exists") ;
-
-                return BadRequest(ModelState);
-
-            }
 
             if (villaDTO == null)
             {
                 return BadRequest();
             }
-            if (villaDTO.Id > 0)
+  
+
+            Villa villa = new Villa()
             {
-                return BadRequest(villaDTO.Id);
-            }
+                Name = villaDTO.Name,
+                Details = villaDTO.Details,
+                Rate = villaDTO.Rate,
+                Sqft = villaDTO.Sqft,
+                Occupancy = villaDTO.Occupancy,
+                ImageUrl = villaDTO.ImageUrl,
+                Amenity = villaDTO.Amenity,
+                CreatedDate = DateTime.Now,
+            };
 
-            villaDTO.Id = VillaStore.VillaDTO().OrderByDescending(x=>x.Id).Select(x=>x.Id).FirstOrDefault() + 1 ;        
-            VillaStore.VillaDTO().Add(villaDTO);
-
-            return CreatedAtRoute("GetVilla",new {id = villaDTO.Id} ,villaDTO )  ;
+            _db.Add(villa);
+            _db.SaveChanges();
+ 
+            return Ok("Villa Created!!!");
 
         }
 
