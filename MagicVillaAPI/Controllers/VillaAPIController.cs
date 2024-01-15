@@ -47,6 +47,8 @@ namespace MagicVillaAPI.Controllers
 
         [HttpPost]
         [Route("CreateVilla")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public IActionResult CreateVilla( [FromBody]VillaDTO villaDTO)
         {
 
@@ -54,8 +56,7 @@ namespace MagicVillaAPI.Controllers
             {
                 return BadRequest();
             }
-  
-
+ 
             Villa villa = new Villa()
             {
                 Name = villaDTO.Name,
