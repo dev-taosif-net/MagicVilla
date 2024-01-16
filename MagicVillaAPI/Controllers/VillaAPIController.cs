@@ -3,6 +3,7 @@ using MagicVillaAPI.Entity;
 using MagicVillaAPI.Models.DTOs;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace MagicVillaAPI.Controllers
 {
@@ -20,9 +21,9 @@ namespace MagicVillaAPI.Controllers
 
         [HttpGet]
         [Route("GetAllVilla")]
-        public IActionResult GetVillas()
+        public async Task<IActionResult>  GetVillas()
         {
-            return Ok(_db.Villas.ToList());
+            return Ok( await _db.Villas.ToListAsync());
         }
 
         [HttpGet]
@@ -30,14 +31,14 @@ namespace MagicVillaAPI.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public IActionResult GetVilla(int id)
+        public async Task<IActionResult>  GetVilla(int id)
         {
             if (id == 0)
             {
                 logger.LogError("Invalid Data");
                 return BadRequest();
             }
-            var result = _db.Villas.FirstOrDefault(x => x.Id == id);
+            var result = await _db.Villas.FirstOrDefaultAsync(x => x.Id == id);
             if (result == null)
             {
                 return NoContent();
@@ -49,7 +50,7 @@ namespace MagicVillaAPI.Controllers
         [Route("CreateVilla")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public IActionResult CreateVilla( [FromBody]VillaDTO villaDTO)
+        public async Task<IActionResult>  CreateVilla( [FromBody]VillaDTO villaDTO)
         {
 
             if (villaDTO == null)
@@ -69,11 +70,11 @@ namespace MagicVillaAPI.Controllers
                 CreatedDate = DateTime.Now,
             };
 
-            _db.Add(villa);
-            _db.SaveChanges();
+            await _db.AddAsync(villa);
+            await _db.SaveChangesAsync();
  
             return Ok("Villa Created!!!");
-            //Comit Problem
+ 
 
         }
 
